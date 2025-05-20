@@ -1,44 +1,35 @@
-def gv
-
-pipeline {
-    agent any
-    parameters {
-        choice(name: 'VERSION', choices: ['1.1.0', '1.2.0', '1.3.0'], description: '')
-        booleanParam(name: 'executeTests', defaultValue: true, description: '')
+pipeline{
+  agent any
+ triggers {
+        githubPush()
+    } 
+  stages {
+    stage("build") {
+      steps {
+          // sh 'npm install'
+          // sh 'npm build'
+          echo 'building the app...'
+      }
     }
-    stages {
-        stage("init") {
-            steps {
-                script {
-                   gv = load "script.groovy" 
-                }
+    stage('Hello') {
+       steps {
+          echo 'Triggered by GitHub!'
             }
         }
-        stage("build") {
-            steps {
-                script {
-                    gv.buildApp()
-                }
-            }
-        }
-        stage("test") {
-            when {
-                expression {
-                    params.executeTests
-                }
-            }
-            steps {
-                script {
-                    gv.testApp()
-                }
-            }
-        }
-        stage("deploy") {
-            steps {
-                script {
-                    gv.deployApp()
-                }
-            }
-        }
-    }   
+    stage("test") {
+      when{
+          expression{
+          BRANCH_NAME == 'dev' || BRANCH_NAME == 'main'
+          }
+      }
+      steps {
+          echo 'testing the app...'
+      }
+    }
+    stage("deploy") {
+      steps {
+          echo 'deploying the app...'
+      }
+    }
+  }
 }
